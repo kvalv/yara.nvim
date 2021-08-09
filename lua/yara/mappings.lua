@@ -36,4 +36,16 @@ function mod.filter_by_user(email)
   instance.view:show(board.issues)
 end
 
+function mod.toggle_filter_by_active_sprint()
+  local instance = _G.yara
+  local board = instance.board
+  if board.issues.filters.by_sprint == nil then
+    board.issues:filter_by_active_sprint()
+  else
+    board.issues.filters.by_sprint = nil
+  end
+  instance.view:show(board.issues)
+end
+
+
 return mod

@@ -205,4 +205,24 @@ function utils.cond(test_expr, then_expr, else_expr)
   return else_expr
 end
 
+function utils.filter(func, items)
+  local out = {}
+  for _, v in pairs(items) do
+    if func(v) then
+      table.insert(out, v)
+    end
+  end
+  return out
+end
+
+function utils.ifilter(func, items)
+  local out = {}
+  for _, v in ipairs(items) do
+    if func(v) then
+      table.insert(out, v)
+    end
+  end
+  return out
+end
+
 return utils

@@ -25,42 +25,30 @@ function IssueCollection.load_from_jira_cli(jira_executable)
   return IssueCollection(keyed_issues)
 end
 
---- Adds a filter that keeps only the issues created by `assignee`
--- @param assignee str the assignee to filter on
 function IssueCollection:filter_by_assignee(assignee)
-  local function func(issues)
-    local out = {}
-    for k, v in pairs(issues) do
-      if v.assignee == assignee then
-        out[k] = v
-      end
-    end
-    return out
+  self.filters.by_assignee = function(issues)
+    return utils.filter(function(e)
+      return e.assignee == assignee
+    end, issues)
   end
-  self.filters.by_assignee = func
+end
+
+function IssueCollection:filter_by_active_sprint()
+  self.filters.by_sprint = function(issues)
+    return utils.filter(function(e)
+      return e.sprint.state == 'active'
+    end, issues)
+  end
 end
 
 --- Adds a filter that keeps only the issues in state `transition_state`
 -- @param transition_state, str `To Do|In Progress|Review|Done`
 function IssueCollection:filter_by_status(transition_state)
-  local function func(issues)
-    local out = {}
-    for k, v in pairs(issues) do
-      if v.status == transition_state then
-        out[k] = v
-      end
-    end
-    return out
+  self.filters.by_status = function(issues)
+    return utils.filter(function(e)
+      return e.status == transition_state
+    end, issues)
   end
-  self.filters.by_status = func
-end
-
-function IssueCollection:clear_filter_by_status()
-  self.filters.by_status = nil
-end
-
-function IssueCollection:clear_filter_by_assignee()
-  self.filters.by_assignee = nil
 end
 
 -- @return Issue[] the issues that matches the current filters
@@ -124,10 +112,10 @@ end)
 function Issue:is_modified()
   return #self._modifications > 0
 end
-Sprint = class(function(self, id, name, active)
+Sprint = class(function(self, id, name, state)
   self.id = id
   self.name = name
-  self.active = active
+  self.state = state
 end)
 
 --- Create an `Issue` from a json entry
@@ -167,11 +155,12 @@ function Issue:refresh()
 end
 
 function Issue:format()
-  local s = utils.cond(self.parent == nil, "task", "subtask")
-  out = {
-    utils.string_replace(string.format('$(key) %s [$(status)] by <$(assignee)>', s), self, 'unknown'),
+  local s = utils.cond(self.parent == nil, 'task', 'subtask')
+  local b = utils.cond(self.sprint.state == 'active', self.sprint.name, 'backlog')
+  local out = {
+    utils.string_replace(string.format('%s $(key) - sprint: %s - [$(status)] by <$(assignee)>', s, b), self, 'unknown'),
     utils.string_replace('summary: $(summary)', self, 'unknown'),
-
+    '',
   }
   return out
 end
