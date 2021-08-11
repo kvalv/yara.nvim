@@ -41,6 +41,17 @@ function IssueCollection:filter_by_active_sprint()
   end
 end
 
+-- applies a filter based on what sprint it is. If `id` is nil, then we filter
+-- by the task being in the backlog.
+function IssueCollection:filter_by_sprint(id)
+  self.filters.by_sprint = function(issues)
+    return utils.filter(function(e)
+      return utils.cond(e.sprint ~= nil, e.sprint.id == id, id == nil)
+    end, issues)
+  end
+end
+
+
 --- Adds a filter that keeps only the issues in state `transition_state`
 -- @param transition_state, str `To Do|In Progress|Review|Done`
 function IssueCollection:filter_by_status(transition_state)
@@ -133,8 +144,8 @@ function Issue.from_json_entry(entry)
   out.status = utils.lookup(entry.fields.status, 'name')
   out.url = nil
   out.sprint = Sprint(
-    utils.lookup(entry.fields, 'customfield_10020', 1, 'name'),
     utils.lookup(entry.fields, 'customfield_10020', 1, 'id'),
+    utils.lookup(entry.fields, 'customfield_10020', 1, 'name'),
     utils.lookup(entry.fields, 'customfield_10020', 1, 'state')
   )
   out.parent = utils.lookup(entry.fields, 'parent', 'id')
@@ -156,9 +167,9 @@ end
 
 function Issue:format()
   local s = utils.cond(self.parent == nil, 'task', 'subtask')
-  local b = utils.cond(self.sprint.state == 'active', self.sprint.name, 'backlog')
+  local b = utils.cond(self.sprint ~= nil, self.sprint.name, 'backlog')
   local out = {
-    utils.string_replace(string.format('%s $(key) - sprint: %s - [$(status)] by <$(assignee)>', s, b), self, 'unknown'),
+    utils.string_replace(string.format('%s $(key) - %s - [$(status)] by <$(assignee)>', s, b), self, 'unknown'),
     utils.string_replace('summary: $(summary)', self, 'unknown'),
     '',
   }

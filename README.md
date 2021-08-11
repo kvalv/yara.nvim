@@ -34,7 +34,8 @@ Once installed, you can open up the window by calling `:YaraOpen`. Keys:
 * `>`: Move issue to next state
 * `<`: Move issue to previous state
 * `I`: Toggle showing issues only to the current user (i.e. issues connected to the e-mail you wrote in the config).
-* `s`: Toggle showing issues only in the current sprint
+* `S`: Toggle showing issues only in the current sprint
+* `s`: Display a menu where you can select issues in a particular sprint (or backlog). E.g. `s0` will display issues only in the backlog.
 
 ----
 

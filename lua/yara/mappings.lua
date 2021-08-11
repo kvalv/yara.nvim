@@ -1,3 +1,4 @@
+local utils = require('yara.utils')
 local mod = {}
 
 function mod.current_issue_prev_state()
@@ -47,5 +48,29 @@ function mod.toggle_filter_by_active_sprint()
   instance.view:show(board.issues)
 end
 
+function mod.filter_by_sprint()
+  local instance = _G.yara
+  local board = instance.board
+
+  local choices = utils.unique(vim.tbl_values(utils.map_attribute('sprint', board.issues.issues)), 'name')
+  table.sort(choices, function(a,b)
+    if a.id == nil then return true end
+    if b.id == nil then return false end
+    return a.id < b.id
+  end)
+
+  local items = utils.map(function(s, i)
+    return {
+      key = tostring(i),
+      label = utils.cond(s.name ~= nil, string.format('%s (%s)', s.name, s.state), 'backlog'),
+      action = function()
+        board.issues:filter_by_sprint(s.id)
+        instance.view:show(board.issues)
+      end,
+    }
+  end, choices)
+
+  utils.menu('Choose which sprint', items, 'sprint id')
+end
 
 return mod

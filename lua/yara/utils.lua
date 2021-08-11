@@ -225,4 +225,36 @@ function utils.ifilter(func, items)
   return out
 end
 
+function utils.map(func, items)
+  local out = {}
+  local i = 0
+  for k, v in pairs(items) do
+    out[k] = func(v, i)
+    i = i + 1
+  end
+  return out
+end
+
+-- utility function to get the attribute from each object in `items`
+-- map_attribute('foo', [{foo=123}, {foo=234}]) --> {123, 234}
+function utils.map_attribute(attr, items, missing)
+  return utils.map(function(e)
+    return e[attr] or missing
+  end, items)
+end
+
+function utils.unique(items, key)
+  local hash = {}
+  local res = {}
+
+  for _, v in ipairs(items) do
+    local h = (utils.cond(key == nil, v, v[key])) or "nil"
+    if not hash[h] then
+      res[#res + 1] = v
+      hash[h] = true
+    end
+  end
+  return res
+end
+
 return utils
