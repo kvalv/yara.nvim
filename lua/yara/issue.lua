@@ -1,12 +1,27 @@
 local mod = {}
-local List = require('plenary.collections.py_list')
 local class = require('yara.class')
 local utils = require('yara.utils')
 
-local TransitionState = List({ 'To Do', 'In Progress', 'Review', 'Done' })
-local JIRA_QUERYFIELDS = 'customfield_10020,summary,description,assignee,labels,priority,issuetype,status,parent'
-local JIRA_DEFAULT_ARGS = { ' ', '--template', 'json', '-f', JIRA_QUERYFIELDS }
--- jira list  --template json -f customfield_10020,summary,description,assignee,labels,priority,issuetype,status,parent
+local TransitionState = { 'To Do', 'In Progress', 'Review', 'Done' }
+-- jira list  --template json -f customfield_10020,summary,description,assignee,labels,priority,issuetype,status,parent,timespent,timeestimate,timeoriginalestimate
+-- 'created'
+-- progress
+
+local JIRA_QUERYFIELDS = {
+  'customfield_10020',
+  'summary',
+  'description',
+  'assignee',
+  'labels',
+  'priority',
+  'issuetype',
+  'status',
+  'parent',
+  'timespent', -- null | int; seconds spent
+  'timeestimate', -- null | int; remaining estimate in seconds (not aggregate for tasks)
+  'timeoriginalestimate', -- null | int; seconds remaining
+}
+local JIRA_DEFAULT_ARGS = { ' ', '--template', 'json', '-f', table.concat(JIRA_QUERYFIELDS, ',') }
 
 IssueCollection = class(function(self, issues)
   self.issues = issues
@@ -50,7 +65,6 @@ function IssueCollection:filter_by_sprint(id)
     end, issues)
   end
 end
-
 
 --- Adds a filter that keeps only the issues in state `transition_state`
 -- @param transition_state, str `To Do|In Progress|Review|Done`
@@ -148,6 +162,11 @@ function Issue.from_json_entry(entry)
     utils.lookup(entry.fields, 'customfield_10020', 1, 'name'),
     utils.lookup(entry.fields, 'customfield_10020', 1, 'state')
   )
+  out.time = {}
+  out.time.spent = utils.lookup(entry.fields, 'timespent')
+  out.time.estimate = utils.lookup(entry.fields, 'timeestimate')
+  out.time.originalestimate = utils.lookup(entry.fields, 'timeoriginalestimate')
+
   out.parent = utils.lookup(entry.fields, 'parent', 'id')
   if out.parent ~= nil then
     out.parent = tonumber(out.parent)
@@ -168,8 +187,15 @@ end
 function Issue:format()
   local s = utils.cond(self.parent == nil, 'task', 'subtask')
   local b = utils.cond(self.sprint ~= nil, self.sprint.name, 'backlog')
+  local t = utils.cond(self.time.spent ~= nil, string.format('%.1fh', (self.time.spent or 0) / 60 / 60), '0')
+  local T = utils.cond(self.time.estimate ~= nil, string.format('%.1fh', (self.time.estimate or 0) / 60 / 60), '?')
+  -- local est = utils.
   local out = {
-    utils.string_replace(string.format('%s $(key) - %s - [$(status)] by <$(assignee)>', s, b), self, 'unknown'),
+    utils.string_replace(
+      string.format('%s $(key) - %s/%s - %s - [$(status)] by <$(assignee)>', s, t, T, b),
+      self,
+      'unknown'
+    ),
     utils.string_replace('summary: $(summary)', self, 'unknown'),
     '',
   }

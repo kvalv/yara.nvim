@@ -164,12 +164,12 @@ end
 function utils.lookup(t, ...)
   for _, k in ipairs({ ... }) do
     if t == nil or t == vim.NIL then
-      return
+      return nil
     end
     t = t[k]
-    -- if not t then
-    --     return nil
-    -- end
+  end
+  if t == vim.NIL then
+    return nil
   end
   return t
 end
@@ -189,13 +189,38 @@ end
 --example: str="today it is %(day)", obj={day="saturday"} --> "today it is saturday"
 function utils.string_replace(str, obj, default)
   while true do
-    local lower, upper, v = string.find(str, '%$%(([%w_]*)%)')
+    local lower, upper, v = string.find(str, '%$%(([%w_.]*)%)')
     if v == nil then
       break
     end
-    str = string.sub(str, 1, lower - 1) .. (obj[v] or default) .. string.sub(str, upper + 1)
+
+    -- Example: obj = {outer = {inner = 123}, foo='bar'}
+    --            v = 'outer.inner'
+    --       result = --> 123
+    if #utils.split(v, '.') > 1 then
+      dump(v)
+      dump(utils.split(v, '.'))
+      dump(utils.lookup(obj, 'time', 'estimate'))
+    end
+    local field = utils.lookup(obj, unpack(utils.split(v, '.'))) or default
+    -- dump(obj)
+    -- dump(utils.split(v, '.'))
+    -- dump({})
+
+    str = string.sub(str, 1, lower - 1) .. field .. string.sub(str, upper + 1)
   end
   return str
+end
+
+function utils.split(s, sep)
+  if sep == nil then
+    sep = '%s'
+  end
+  local t = {}
+  for str in string.gmatch(s, '([^' .. sep .. ']+)') do
+    table.insert(t, str)
+  end
+  return t
 end
 
 function utils.cond(test_expr, then_expr, else_expr)
@@ -248,7 +273,7 @@ function utils.unique(items, key)
   local res = {}
 
   for _, v in ipairs(items) do
-    local h = (utils.cond(key == nil, v, v[key])) or "nil"
+    local h = (utils.cond(key == nil, v, v[key])) or 'nil'
     if not hash[h] then
       res[#res + 1] = v
       hash[h] = true

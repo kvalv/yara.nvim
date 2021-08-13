@@ -53,9 +53,13 @@ function mod.filter_by_sprint()
   local board = instance.board
 
   local choices = utils.unique(vim.tbl_values(utils.map_attribute('sprint', board.issues.issues)), 'name')
-  table.sort(choices, function(a,b)
-    if a.id == nil then return true end
-    if b.id == nil then return false end
+  table.sort(choices, function(a, b)
+    if a.id == nil then
+      return true
+    end
+    if b.id == nil then
+      return false
+    end
     return a.id < b.id
   end)
 
