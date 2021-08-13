@@ -51,7 +51,7 @@ and painful to use. As a developer, I want jira to stay out of my way as much as
 - [x] View issues hierarchically; tasks and subtasks are grouped together.
 - [x] Move tasks forward (`>`) and backwards (`<`)
 - [ ] Filter by other users
-- [ ] View issues in backlog, current sprint, next sprint etc.
+- [x] View issues in backlog, current sprint, next sprint etc.
 - [ ] bind git branches to tasks, and automatically track time used
 - [ ] Bugs are displayed distinctively
 - [ ] Refresh tasks
