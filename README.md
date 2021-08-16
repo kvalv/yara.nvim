@@ -1,6 +1,6 @@
 yara.nvim
 ===
-yet another jira wrapper for neovim
+yet another jira wrapper (for neovim)
 
 This plugin enables the most used jira workflows inside of neovim using as few keystrokes as possible.
 
@@ -42,8 +42,11 @@ Once installed, you can open up the window by calling `:YaraOpen`. Keys:
 
 ### Motivation
 
-Jira is a behemoth that serves all kinds of organizations and workflows. Consequently, it has a vast web interface that is slow
-and painful to use. As a developer, I want jira to stay out of my way as much as possible so I can focus on software development rather than spending time in jira. This plugin aims to make it as easy as possible to do the basic workflows related to agile development in jira.
+The Jira web interface is not ideal for frequent viewing and updating tasks during a sprint. Consequently, tracking tasks properly is
+not easy to do, and I lose a lot of learning and insight by not keeping the tasks up-to-date. This plugin seeks to make it
+easier to view, filter and update my tasks in a sprint.
+
+Better documentation / customization will probably come in place once all the feature goals are in place.
 
 ### Feature goals (somewhat in order)
 
