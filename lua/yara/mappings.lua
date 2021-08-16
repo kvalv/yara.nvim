@@ -77,4 +77,14 @@ function mod.filter_by_sprint()
   utils.menu('Choose which sprint', items, 'sprint id')
 end
 
+function mod.add_worklog()
+  local instance = _G.yara
+  local view = instance.view
+  local issue = view:get_current_issue()
+  local w = vim.fn.input('Please write your hours: ')
+  local t = require('yara.time').Time.guess_from_str(w)
+  issue:add_worklog(t)
+  view:redraw_issue(issue)
+end
+
 return mod

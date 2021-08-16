@@ -1,0 +1,12 @@
+local time = require('yara.time')
+describe('parses time from a string', function()
+  it('returns a Time object', function()
+    local result = time.Time.guess_from_str('1.5h 10m    12s')
+    local expected = time.Time({hours=1.5, minutes=10, seconds=12})
+    assert.are.same(expected, result)
+  end)
+
+  it('crashes if a bad string is passed', function()
+    assert.has.errors(function() time.Time.guess_from_str('1.5.2h') end)
+  end)
+end)

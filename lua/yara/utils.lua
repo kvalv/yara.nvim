@@ -185,27 +185,32 @@ function utils.tbl_index(t, predicate)
   return -1
 end
 
---- replace every occurence of %key in the str `str` with `obj.key`
---example: str="today it is %(day)", obj={day="saturday"} --> "today it is saturday"
-function utils.string_replace(str, obj, default)
+--- replace every occurence of $(key) in the str `str` with `obj.key`.
+---@param str string the template string
+---@param obj table keys used as lookup
+---@param default string the default value if lookup key is not found
+---@param modifiers table; keys should be subset of the keys in `obj` and values are a function that
+--  take two arguments: (1) the value `obj[key]`; and (2) an optional string that can be used as an
+--  extra argument in the function. It should return another string, which will be the replacement
+--  string.
+--
+--example: str="today is $(day:!!)", obj={day="sunday"}, modifiers={'day'=function(s, m) return s:upper() .. m end} --> "today it is SUNDAY!!"
+function utils.string_replace(str, obj, default, modifiers)
   while true do
-    local lower, upper, v = string.find(str, '%$%(([%w_.]*)%)')
-    if v == nil then
+    local lower, upper, key, transform_str = string.find(str, '%$%(([%w_.]+)(:?[^)]*)%)')
+    if transform_str ~= nil then
+      transform_str = string.sub(transform_str, 2)
+    end
+
+    if key == nil then
       break
     end
 
-    -- Example: obj = {outer = {inner = 123}, foo='bar'}
-    --            v = 'outer.inner'
-    --       result = --> 123
-    if #utils.split(v, '.') > 1 then
-      dump(v)
-      dump(utils.split(v, '.'))
-      dump(utils.lookup(obj, 'time', 'estimate'))
+    -- local key, transform_str = string.match(str, '%$%(([%w_.]+):?(.*)%)')
+    local field = utils.lookup(obj, unpack(utils.split(key, '.'))) or default
+    if (modifiers ~= nil) and (modifiers[key] ~= nil) then
+      field = modifiers[key](field, transform_str)
     end
-    local field = utils.lookup(obj, unpack(utils.split(v, '.'))) or default
-    -- dump(obj)
-    -- dump(utils.split(v, '.'))
-    -- dump({})
 
     str = string.sub(str, 1, lower - 1) .. field .. string.sub(str, upper + 1)
   end

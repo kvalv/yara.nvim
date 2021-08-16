@@ -6,6 +6,7 @@ nnoremap <buffer> <nowait> <silent> < :lua require("yara.mappings").current_issu
 nnoremap <buffer> <nowait> <silent> I :lua require("yara.mappings").toggle_filter_only_current_user()<CR>
 nnoremap <buffer> <nowait> <silent> S :lua require("yara.mappings").toggle_filter_by_active_sprint()<CR>
 nnoremap <buffer> <nowait> <silent> s :lua require("yara.mappings").filter_by_sprint()<CR>
+nnoremap <buffer> <nowait> <silent> P :lua require("yara.mappings").add_worklog()<CR>
 
 augroup _yara_mappings
     autocmd!

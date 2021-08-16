@@ -36,6 +36,7 @@ Once installed, you can open up the window by calling `:YaraOpen`. Keys:
 * `I`: Toggle showing issues only to the current user (i.e. issues connected to the e-mail you wrote in the config).
 * `S`: Toggle showing issues only in the current sprint
 * `s`: Display a menu where you can select issues in a particular sprint (or backlog). E.g. `s0` will display issues only in the backlog.
+* `P`: Interactively add worklog hours for the task the cursor is on
 
 ----
 
@@ -55,7 +56,7 @@ and painful to use. As a developer, I want jira to stay out of my way as much as
 - [ ] bind git branches to tasks, and automatically track time used
 - [ ] Bugs are displayed distinctively
 - [ ] Refresh tasks
-- [ ] Log hours on tasks
+- [x] Log hours on tasks
 - [ ] Create new tasks
 
 [go-jira]: https://github.com/go-jira/jira

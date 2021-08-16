@@ -244,7 +244,10 @@ function Issue:prev_state()
   table.insert(self._modifications, change)
 end
 
-function Issue:add_worklog() end
+function Issue:add_worklog(time)
+  local s = string.format('jira worklog add %s --time-spent="%s" --noedit', self.key, time:strftime('%hh %mm'))
+  vim.fn.system(s)
+end
 
 function Issue:update_remaining_hours() end
 
