@@ -8,25 +8,6 @@ ViewState = class(function(self)
   self.buf = nil
 end)
 
-local function add_format_lines(issue, is_subtask)
-  local prefix = utils.cond(is_subtask, '-     ', '* ')
-  local lines = {}
-  table.insert(
-    lines,
-    string.format(
-      '%s %s [%s] <%s> %s',
-      prefix,
-      issue.key,
-      utils.cond(issue:is_modified(), '+', ' '),
-      issue.status,
-      issue.assignee or 'UNASSIGNED',
-      '4h30m/8h'
-    )
-  )
-  table.insert(lines, '      ' .. (issue.summary or '<No summary>'))
-  return lines
-end
-
 function ViewState:show(issues_list)
   local opts = {
     relative = 'editor',

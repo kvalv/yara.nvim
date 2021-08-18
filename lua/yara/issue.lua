@@ -214,8 +214,6 @@ function Issue:flush_changes(jira_executable)
   self:refresh()
 end
 
-function Issue:is_in_current_sprint() end
-
 function Issue:next_state()
   local i = utils.tbl_index(TransitionState, function(s)
     return self.status == s
@@ -248,12 +246,6 @@ function Issue:add_worklog(time)
   local s = string.format('jira worklog add %s --time-spent="%s" --noedit', self.key, time:strftime('%hh %mm'))
   vim.fn.system(s)
 end
-
-function Issue:update_remaining_hours() end
-
-function Issue:clock_in() end
-
-function Issue:clock_out() end
 
 IssueModification = class(function(self)
   self.cmd = nil

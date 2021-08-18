@@ -49,24 +49,6 @@ function utils.capitalize(word)
   return (word:gsub('^%l', string.upper))
 end
 
----@param isoweekday number
----@return number
-function utils.convert_from_isoweekday(isoweekday)
-  if isoweekday == 7 then
-    return 1
-  end
-  return isoweekday + 1
-end
-
----@param weekday number
----@return number
-function utils.convert_to_isoweekday(weekday)
-  if weekday == 1 then
-    return 7
-  end
-  return weekday - 1
-end
-
 ---@param tbl table
 ---@param callback function
 ---@param acc any
@@ -141,24 +123,6 @@ end
 
 function utils.esc(cmd)
   return vim.api.nvim_replace_termcodes(cmd, true, false, true)
-end
-
-function utils.parse_tags_string(tags)
-  local parsed_tags = {}
-  for _, tag in ipairs(vim.split(tags or '', ':')) do
-    if tag:find('^[%w_%%@#]+$') then
-      table.insert(parsed_tags, tag)
-    end
-  end
-  return parsed_tags
-end
-
-function utils.tags_to_string(taglist)
-  local tags = ''
-  if #taglist > 0 then
-    tags = ':' .. table.concat(taglist, ':') .. ':'
-  end
-  return tags
 end
 
 function utils.lookup(t, ...)
