@@ -21,6 +21,7 @@ local JIRA_QUERYFIELDS = {
   'timespent', -- null | int; seconds spent
   'timeestimate', -- null | int; remaining estimate in seconds (not aggregate for tasks)
   'timeoriginalestimate', -- null | int; seconds remaining
+  'customfield_10026',
 }
 local JIRA_DEFAULT_ARGS = { ' ', '--template', 'json', '-f', table.concat(JIRA_QUERYFIELDS, ',') }
 
@@ -127,6 +128,7 @@ end
 -- @field url str
 -- @field parent nil|Issue
 -- @field subtasks nil|array[Issue]
+-- @field story_points int|nil
 --
 Issue = class(function(self)
   self._modifications = {}
@@ -168,6 +170,7 @@ function Issue.from_json_entry(entry)
   out.time.spent = Time { seconds = utils.lookup(entry.fields, 'timespent') or 0}
   out.time.estimate = Time{seconds=utils.lookup(entry.fields, 'timeestimate') or 0}
   out.time.originalestimate = Time{seconds=utils.lookup(entry.fields, 'timeoriginalestimate') or 0}
+  out.story_points = entry.fields.customfield_10026
 
   out.parent = utils.lookup(entry.fields, 'parent', 'id')
   if out.parent ~= nil then
