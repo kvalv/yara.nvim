@@ -13,15 +13,8 @@ local defaults = {
       ' $(summary)',
       '',
     },
+    time = '%H:%M',
     transforms = {
-      time = {
-        spent = function(t)
-          return t:strftime('%Hh:%Mm')
-        end,
-        estimate = function(t)
-          return t:strftime('%Hh:%Mm')
-        end,
-      },
       parent = function(s)
         if s == nil then
           return 'task'

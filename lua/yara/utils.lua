@@ -157,7 +157,7 @@ end
 --  take two arguments: (1) the value `obj[key]`; and (2) an optional string that can be used as an
 --  extra argument in the function. It should return another string, which will be the replacement
 --  string.
-function utils.string_replace(str, obj, modifiers)
+function utils.string_replace(str, obj, modifiers, time_fmt)
   while true do
     local lower, upper, key, default = string.find(str, '%$%(([%w_.]+)(:?[^)]*)%)')
 
@@ -171,6 +171,9 @@ function utils.string_replace(str, obj, modifiers)
       if f ~= nil then
         field = f(field)
       end
+    end
+    if field ~= nil and field.strftime ~= nil and time_fmt ~= nil then
+      field = field:strftime(time_fmt)
     end
     if field == nil and default ~= nil then
       field = str.sub(default, 2)  -- remove leading :

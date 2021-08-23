@@ -167,9 +167,9 @@ function Issue.from_json_entry(entry)
     utils.lookup(entry.fields, 'customfield_10020', 1, 'state')
   )
   out.time = {}
-  out.time.spent = Time { seconds = utils.lookup(entry.fields, 'timespent') or 0}
-  out.time.estimate = Time{seconds=utils.lookup(entry.fields, 'timeestimate') or 0}
-  out.time.originalestimate = Time{seconds=utils.lookup(entry.fields, 'timeoriginalestimate') or 0}
+  out.time.spent = Time({ seconds = utils.lookup(entry.fields, 'timespent') or 0 })
+  out.time.estimate = Time({ seconds = utils.lookup(entry.fields, 'timeestimate') or 0 })
+  out.time.originalestimate = Time({ seconds = utils.lookup(entry.fields, 'timeoriginalestimate') or 0 })
   out.story_points = entry.fields.customfield_10026
 
   out.parent = utils.lookup(entry.fields, 'parent', 'id')
@@ -195,7 +195,7 @@ end
 function Issue:format(fmt_lines, transforms)
   local result = {}
   for _, v in ipairs(fmt_lines) do
-    table.insert(result, utils.string_replace(v, self, transforms))
+    table.insert(result, utils.string_replace(v, self, transforms, _G.yara.config.format.time))
   end
   return result
 end
