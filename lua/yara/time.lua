@@ -1,21 +1,30 @@
 local class = require('yara.class')
 
 Time = class(function(self, opts)
+  if opts == nil then
+    self.seconds = 0
+    return self
+  end
   self.seconds = (opts.seconds or 0) + (opts.minutes or 0) * 60 + (opts.hours or 0) * 60 * 60
   self.seconds = math.floor(self.seconds)
   return self
 end)
 
 function Time.guess_from_str(s)
-  -- lua print(string.find('123h', '%d+h'))
   local seconds = 0
   local dct = {}
   local p = '%S+'
-  dct[p .. 'h'] = function(v) return math.floor((tonumber(v) or 0) * 60 * 60) end
-  dct[p .. 'm'] = function(v) return math.floor((tonumber(v) or 0) * 60) end
+  dct[p .. 'h'] = function(v)
+    return math.floor((tonumber(v) or 0) * 60 * 60)
+  end
+  dct[p .. 'm'] = function(v)
+    return math.floor((tonumber(v) or 0) * 60)
+  end
   -- not sure if fractional seconds make sense in jira, but whatever. We'll round it down
   -- anyways
-  dct[p .. 's'] = function(v) return math.floor(tonumber(v) or 0) end
+  dct[p .. 's'] = function(v)
+    return math.floor(tonumber(v) or 0)
+  end
   for pat, fn in pairs(dct) do
     local i, j = string.find(s, pat)
     if i ~= nil then
@@ -25,7 +34,7 @@ function Time.guess_from_str(s)
       seconds = seconds + fn(value)
     end
   end
-  return Time({seconds=seconds})
+  return Time({ seconds = seconds })
 end
 
 function Time:minutes()
@@ -37,11 +46,9 @@ function Time:hours()
 end
 
 function Time:strftime(format_string)
-  local seconds_left = self.seconds % 60
   local seconds = self.seconds % 60
   local minutes = math.floor((self.seconds % (60 * 60)) / 60)
   local hours = math.floor((self.seconds % (60 * 60 * 60)) / (60 * 60))
-
 
   local mapping = {}
   mapping['%%s'] = seconds

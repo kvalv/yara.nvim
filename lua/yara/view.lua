@@ -44,13 +44,15 @@ function ViewState:show(issues_list)
 
   api.nvim_buf_set_lines(self.buf, 0, -1, true, {})
   local i = 0
+  local fmt = _G.yara.config.format.lines
+  local transforms = _G.yara.config.format.transforms
   for issue, children in pairs(issues_list:grouped_filtered_issues()) do
     self:redraw_issue(issue, i)
-    i = i + (#issue:format())
+    i = i + (#issue:format(fmt, transforms))
 
     for _, c in ipairs(children) do
       self:redraw_issue(c, i)
-      i = i + (#c:format())
+      i = i + (#c:format(fmt, transforms))
     end
   end
 
@@ -74,7 +76,9 @@ function ViewState:redraw_issue(issue, row)
   end
   api.nvim_buf_set_option(self.buf, 'modifiable', true)
 
-  local format_lines = issue:format()
+  local fmt = _G.yara.config.format.lines
+  local transforms = _G.yara.config.format.transforms
+  local format_lines = issue:format(fmt, transforms)
   api.nvim_buf_set_lines(self.buf, i, i + #format_lines, false, format_lines)
   api.nvim_buf_set_extmark(self.buf, self.ns_id, i, 0, { end_line = i + #format_lines, id = issue.id })
 

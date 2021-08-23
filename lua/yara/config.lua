@@ -7,6 +7,30 @@ end)
 
 local defaults = {
   jira_executable = 'jira',
+  format = {
+    lines = {
+      '$(parent) $(key) by $(assignee:unassigned) in $(sprint.name:backlog) - $(time.spent) / $(time.estimate) -- $(status)',
+      ' $(summary)',
+      '',
+    },
+    transforms = {
+      time = {
+        spent = function(t)
+          return t:strftime('%Hh:%Mm')
+        end,
+        estimate = function(t)
+          return t:strftime('%Hh:%Mm')
+        end,
+      },
+      parent = function(s)
+        if s == nil then
+          return 'task'
+        else
+          return 'subtask'
+        end
+      end,
+    },
+  },
 }
 
 function Config.new(opts)

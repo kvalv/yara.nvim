@@ -18,12 +18,20 @@ Use your favourite package manager.
 Plug 'kvalv/yara.nvim'
 ```
 
-Additional options (currently only e-mail and executable) can be provided like this:
+Additional options can be provided like this (full syntax for `format.lines` will be provided once it's a bit more stable):
 ```
 lua << EOF
 require('yara').setup({
-    jira_executable="jira",
-    email="some-email@bigcorp.com",
+    jira_executable = "jira",
+    email = "some-email@bigcorp.com",
+    format = {
+        lines = {
+            "$(key) by $(assignee:unassigned) in $(sprint.name:backlog) [$(status)]", 
+            "$(time.spent) / $(time.estimate)",
+            "$(summary)",
+            "",
+        }
+    }
 })
 EOF
 ```

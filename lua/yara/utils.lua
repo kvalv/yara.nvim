@@ -157,24 +157,26 @@ end
 --  take two arguments: (1) the value `obj[key]`; and (2) an optional string that can be used as an
 --  extra argument in the function. It should return another string, which will be the replacement
 --  string.
---
---example: str="today is $(day:!!)", obj={day="sunday"}, modifiers={'day'=function(s, m) return s:upper() .. m end} --> "today it is SUNDAY!!"
-function utils.string_replace(str, obj, default, modifiers)
+function utils.string_replace(str, obj, modifiers)
   while true do
-    local lower, upper, key, transform_str = string.find(str, '%$%(([%w_.]+)(:?[^)]*)%)')
-    if transform_str ~= nil then
-      transform_str = string.sub(transform_str, 2)
-    end
+    local lower, upper, key, default = string.find(str, '%$%(([%w_.]+)(:?[^)]*)%)')
 
     if key == nil then
       break
     end
 
-    -- local key, transform_str = string.match(str, '%$%(([%w_.]+):?(.*)%)')
-    local field = utils.lookup(obj, unpack(utils.split(key, '.'))) or default
-    if (modifiers ~= nil) and (modifiers[key] ~= nil) then
-      field = modifiers[key](field, transform_str)
+    local field = utils.lookup(obj, unpack(utils.split(key, '.')))
+    if modifiers ~= nil then
+      local f = utils.lookup(modifiers, unpack(utils.split(key, '.')))
+      if f ~= nil then
+        field = f(field)
+      end
     end
+    if field == nil and default ~= nil then
+      field = str.sub(default, 2)  -- remove leading :
+    end
+
+    assert(field ~= nil, string.format('Unable to get any value for field "%s".', key))
 
     str = string.sub(str, 1, lower - 1) .. field .. string.sub(str, upper + 1)
   end

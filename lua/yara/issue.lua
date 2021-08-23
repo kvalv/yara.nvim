@@ -1,6 +1,7 @@
 local mod = {}
 local class = require('yara.class')
 local utils = require('yara.utils')
+local Time = require('yara.time').Time
 
 local TransitionState = { 'To Do', 'In Progress', 'Review', 'Done' }
 -- jira list  --template json -f customfield_10020,summary,description,assignee,labels,priority,issuetype,status,parent,timespent,timeestimate,timeoriginalestimate
@@ -124,7 +125,6 @@ end
 -- @field summary str
 -- @field status str "To Do|In Progress|Review|Done"
 -- @field url str
--- @field sprint_no str
 -- @field parent nil|Issue
 -- @field subtasks nil|array[Issue]
 --
@@ -132,6 +132,8 @@ Issue = class(function(self)
   self._modifications = {}
   self.parent = nil
   self.subtasks = {}
+  self.assignee = {}
+  self.sprint = Sprint(nil, nil, nil)
 end)
 
 function Issue:is_modified()
@@ -163,9 +165,9 @@ function Issue.from_json_entry(entry)
     utils.lookup(entry.fields, 'customfield_10020', 1, 'state')
   )
   out.time = {}
-  out.time.spent = utils.lookup(entry.fields, 'timespent')
-  out.time.estimate = utils.lookup(entry.fields, 'timeestimate')
-  out.time.originalestimate = utils.lookup(entry.fields, 'timeoriginalestimate')
+  out.time.spent = Time { seconds = utils.lookup(entry.fields, 'timespent') or 0}
+  out.time.estimate = Time{seconds=utils.lookup(entry.fields, 'timeestimate') or 0}
+  out.time.originalestimate = Time{seconds=utils.lookup(entry.fields, 'timeoriginalestimate') or 0}
 
   out.parent = utils.lookup(entry.fields, 'parent', 'id')
   if out.parent ~= nil then
@@ -184,22 +186,15 @@ function Issue:refresh()
   end
 end
 
-function Issue:format()
-  local s = utils.cond(self.parent == nil, 'task', 'subtask')
-  local b = utils.cond(self.sprint ~= nil, self.sprint.name, 'backlog')
-  local t = utils.cond(self.time.spent ~= nil, string.format('%.1fh', (self.time.spent or 0) / 60 / 60), '0')
-  local T = utils.cond(self.time.estimate ~= nil, string.format('%.1fh', (self.time.estimate or 0) / 60 / 60), '?')
-  -- local est = utils.
-  local out = {
-    utils.string_replace(
-      string.format('%s $(key) - %s/%s - %s - [$(status)] by <$(assignee)>', s, t, T, b),
-      self,
-      'unknown'
-    ),
-    utils.string_replace('summary: $(summary)', self, 'unknown'),
-    '',
-  }
-  return out
+--- Transform an issue to a list of strings that can be written to a buffer
+--@param fmt_lines list of strings; string format to use, one for each line
+--@param transforms table optional transformation function to apply for the format lines
+function Issue:format(fmt_lines, transforms)
+  local result = {}
+  for _, v in ipairs(fmt_lines) do
+    table.insert(result, utils.string_replace(v, self, transforms))
+  end
+  return result
 end
 
 function Issue:flush_changes(jira_executable)
@@ -286,4 +281,5 @@ end
 mod.Issue = Issue
 mod.IssueCollection = IssueCollection
 mod.Board = Board
+mod.Sprint = Sprint
 return mod
